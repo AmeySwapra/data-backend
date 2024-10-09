@@ -11,11 +11,13 @@ app.use(cors());
 app.use(express.json());
 
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-    
 
 const dataSchema = new mongoose.Schema({
     intensity: Number,
@@ -27,43 +29,46 @@ const dataSchema = new mongoose.Schema({
     region: String,
     city: String,
 });
-const dataIntensity = new mongoose.Schema({
+
+const dataIntensitySchema = new mongoose.Schema({
     year: {
         type: Number,
-        required: true 
+        required: true
     },
     intensity: {
-        type: [Number], 
-        default: [] 
+        type: [Number],
+        default: []
     },
     likelihood: {
-        type: [Number], 
-        default: [] 
+        type: [Number],
+        default: []
     }
 });
 
-const DataInteSity = mongoose.model('IntensityData', dataIntensity, 'data-intensity');
-const DataModel = mongoose.model('Data', dataSchema, 'data-collection')
+
+const DataModel = mongoose.model('Data', dataSchema, 'data-collection');
+const DataIntensityModel = mongoose.model('IntensityData', dataIntensitySchema, 'data-intensity');
+
+
 app.get('/api/data', async (req, res) => {
     try {
         const data = await DataModel.find();
         res.json(data);
-        console.log(data)
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error fetching data:', error.message);
+        res.status(500).json({ message: 'Failed to fetch data', error: error.message });
     }
 });
 
 app.get('/api/data-intensity', async (req, res) => {
     try {
-        const data = await DataInteSity.find();
-        res.json(data);
-        console.log(data)
+        const dataIntensity = await DataIntensityModel.find();
+        res.json(dataIntensity);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error fetching data intensity:', error.message);
+        res.status(500).json({ message: 'Failed to fetch data intensity', error: error.message });
     }
-})
-
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
