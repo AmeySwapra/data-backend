@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5000;
 
 
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: ['http://localhost:5173', 'https://data-visualziation-dashboard.netlify.app'], 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 }));
 app.use(express.json());
